@@ -67,7 +67,7 @@ public class MainActivity extends AppCompatActivity {
                 call.enqueue(new Callback<LoginResult>() {
                     @Override
                     public void onResponse(Response<LoginResult> response, Retrofit retrofit) {
-                        if (response.code() == 201) {
+                        if (response.code() == 200) {
 
                             LoginResult result = response.body();
 
@@ -112,7 +112,7 @@ public class MainActivity extends AppCompatActivity {
                 call.enqueue(new Callback<Void>() {
                     @Override
                     public void onResponse(Response<Void> response, Retrofit retrofit) {
-                        if (response.code() == 201) {
+                        if (response.code() == 200) {
                             Toast.makeText(MainActivity.this, "Signed up successfully", Toast.LENGTH_LONG).show();
                         }
                         else if (response.code() == 400) {

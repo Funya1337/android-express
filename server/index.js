@@ -1,8 +1,8 @@
 const mongoose = require("mongoose");
-const Bcrypt = require("bcryptjs");
+const bcrypt = require("bcrypt");
 const express = require("express");
 const bodyParser = require("body-parser");
-let userSchema = require("./model");
+const userSchema = require("./model");
 const app = express();
 const port = 3000;
 
@@ -17,11 +17,14 @@ db.once("open", function() {
   console.log("We are connected!");
 
   app.post("/signup", async (req, res) => {
+    const password = req.body.password;
+    const saltRounds = 10;
+    const hash = await bcrypt.hash(password, saltRounds);
     try {
       const user1 = new userSchema({
         name: req.body.name,
         email: req.body.email,
-        password: req.body.password
+        password: hash
       });
       let saveUser = await user1.save();
       console.log(saveUser);
@@ -32,20 +35,22 @@ db.once("open", function() {
     }
   });
   app.post("/login", async (req, res) => {
+    const password = req.body.password;
     try {
-      const query = {
-        email: req.body.email,
-        password: req.body.password
-      };
-      let findUser = await userSchema.find(query);
-      if (findUser.length === 0) {
-        res.status(404).send();
-      } else {
+      const user = await userSchema
+        .findOne({
+          email: req.body.email
+        })
+        .exec();
+      const match = await bcrypt.compare(password, user.password);
+      if (match && user) {
         const objToSend = {
-          name: findUser[0].name,
-          email: findUser[0].email
+          name: user.name,
+          email: user.email
         };
         res.status(200).send(JSON.stringify(objToSend));
+      } else {
+        res.status(404).send();
       }
     } catch {
       res.sendStatus(500);
